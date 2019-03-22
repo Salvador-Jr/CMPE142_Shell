@@ -1,3 +1,5 @@
+#define _POSIX_SOURCE
+#undef _POSIX_SOURCE
 #include <err.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -5,6 +7,37 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #define Byte 8
+// Main Method
+//int main()
+//{
+//    char s[100];
+//
+//    // printing current working directory
+//    printf("INIT %s\n", getcwd(s, 100));
+//
+//    // using the command
+//    chdir("..");
+//
+//    // printing current working directory
+//    printf("%s\n", getcwd(s, 100));
+//
+//    if (chdir("/Users/SalvadorJr/Desktop/ostep-code") != 0)
+//        perror("chdir() to /Users/SalvadorJr/Desktop/ostep-code FAILED");
+//
+//    // changing the cwd to /tmp
+//    if (chdir("CMPE142_Shell") != 0)
+//        perror("chdir() to /CMPE142_Shell failed");
+//
+//    // there is no /error
+//    // directory in my pc
+//    if (chdir("/error") != 0)
+//
+//        // so chdir will return -1
+//        perror("chdir() to /error failed");
+//
+//    return 0;     return 0;
+//}
+
 
 //DB stands for Debug print statment. Will need to delete before submitting
 void printShell()
@@ -26,9 +59,8 @@ char **readLine(char *Line)
     char **updatedPath = malloc(Byte * sizeof(char *));
     int index = 0;
     char *NullTerminat = "\0";
-    
     token = strtok(Line, " ");
-    
+
     if (strncmp("path", token, 4) == 0)
     {
         while(token != NULL)
@@ -46,7 +78,7 @@ char **readLine(char *Line)
         //        printf("DB: Token%i %s,",index, token);
         linePassed[index] = token;
         index++;
-        token = strtok(NULL, " ");
+        token = strtok(NULL, "/");
         if (token  == NULL)
         {
             //            printf("DB:WE ARE AT THE NULL\n");
@@ -85,9 +117,22 @@ int main() {
                 write(STDERR_FILENO, error_message, strlen(error_message));
                 printShell();
             }
+            //Need to fix this because it will not cd on the last file path.
+            //see DB stmt. last path takes in a return line so does not recongize file
             else if (parsedLine[1] !=NULL)
             {
                 path = parsedLine[1];
+                for(int i =1; i < 100; i++)
+                {
+                    if(parsedLine[i] !=NULL) {
+                        printf("DB:trying to cd on:%s.\n",parsedLine[i]);
+                        chdir(parsedLine[i]);
+                    }
+                    if(parsedLine[i] ==NULL) {
+                        printf("DB:going to exit loop\n");
+                        i = 99;
+                    }
+                }
                 printf("DB:We will now CD %s",path);
                 printShell();
             }
@@ -101,7 +146,9 @@ int main() {
             }
             else if (parsedLine[1] !=NULL)
             {
-                printf("DB:your selected path is %s",parsedLine[1] );
+                path = parsedLine[1];
+                printf("DB:your selected path is %s",path);
+
                 printShell();
             }
         }
@@ -110,7 +157,7 @@ int main() {
             printf("DB:user wants to print \n");
             userCurrentDirectory();
         }
-        
+
         else if (strncmp("ls", parsedLine[0],2) == 0)
         {
 //            printf("DB:list \n");
@@ -153,11 +200,11 @@ int main() {
             write(STDERR_FILENO, error_message, strlen(error_message));
             printShell();
         }
-        
+//Should we free in the while loop or outside the loop?
         //        free(line);
         //        free(parsedLine);
     }
-    
+
     return 0;
 }
 
