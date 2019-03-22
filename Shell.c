@@ -7,38 +7,6 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #define Byte 8
-// Main Method
-//int main()
-//{
-//    char s[100];
-//
-//    // printing current working directory
-//    printf("INIT %s\n", getcwd(s, 100));
-//
-//    // using the command
-//    chdir("..");
-//
-//    // printing current working directory
-//    printf("%s\n", getcwd(s, 100));
-//
-//    if (chdir("/Users/SalvadorJr/Desktop/ostep-code") != 0)
-//        perror("chdir() to /Users/SalvadorJr/Desktop/ostep-code FAILED");
-//
-//    // changing the cwd to /tmp
-//    if (chdir("CMPE142_Shell") != 0)
-//        perror("chdir() to /CMPE142_Shell failed");
-//
-//    // there is no /error
-//    // directory in my pc
-//    if (chdir("/error") != 0)
-//
-//        // so chdir will return -1
-//        perror("chdir() to /error failed");
-//
-//    return 0;     return 0;
-//}
-
-
 //DB stands for Debug print statment. Will need to delete before submitting
 void printShell()
 {
@@ -157,7 +125,11 @@ int main() {
             printf("DB:user wants to print \n");
             userCurrentDirectory();
         }
-
+        else if (strncmp("&", parsedLine[0],1) == 0)    // test 16
+        {
+           printShell();
+        }
+        
         else if (strncmp("ls", parsedLine[0],2) == 0)
         {
 //            printf("DB:list \n");
