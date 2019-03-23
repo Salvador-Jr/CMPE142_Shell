@@ -130,6 +130,11 @@ int main() {
            printShell();
         }
         
+        else if (strncmp("", parsedLine[0],0) == 0)    // test 21 (empty command)
+        {
+           printShell();
+        }
+        
         else if (strncmp("ls", parsedLine[0],2) == 0)
         {
 //            printf("DB:list \n");
