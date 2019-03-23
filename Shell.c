@@ -187,7 +187,9 @@ int main() {
            printShell();
         }
         else if (strcmp("ls\n", parsedLine[0]) == 0)
-
+        {
+            
+        }
         
         else if (strncmp("", parsedLine[0],0) == 0)    // test 21 (empty command)
         {
