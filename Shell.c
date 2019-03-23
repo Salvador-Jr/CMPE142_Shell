@@ -83,6 +83,43 @@ char **readLine(char *Line)
     }
 }
 
+void redir(char *cmd, char **file)
+{
+    int fd, fds[2], count;
+    char x;
+    pid_t pid;
+    pipe(fds);
+
+        if (fork() == 0)
+    {
+        //stdin redirection
+        fd = open(file[0], O_RDWR, 0777);
+        dup2(fds[0], 0);
+        close(fds[1]);
+
+        //stdout redirection
+        while ((count = read(0, &x, 1)) > 0)
+        write (fd, &x, 1);  
+        exit (0);
+
+        execvp((const char*)cmd[0], (char *const*) cmd);
+    }
+}
+
+int whitespacecounter(char *input, int length)  //for whitespaces in an input string
+{
+    int i = 0;
+    int counter = 0;
+    for (i = 0; i < length; i++)
+    {
+        if (input[i] == ' ')
+        {
+            counter++;
+        }
+    }
+        return counter;
+}
+
 int main() {
     char **parsedLine;
     char *line = NULL;
@@ -92,6 +129,7 @@ int main() {
     ssize_t linelen;
     pid_t child_pid;
     int stat_loc;
+    int length;
     char error_message[30] = "An error has occurred\n";
     printShell();
     while ((linelen = getline(&line, &linesize, stdin)) != -1)
@@ -145,7 +183,23 @@ int main() {
         {
            printShell();
         }
+<<<<<<< HEAD
         else if (strcmp("ls\n", parsedLine[0]) == 0)
+=======
+        
+        else if (strncmp("", parsedLine[0],0) == 0)    // test 21 (empty command)
+        {
+           printShell();
+        }
+        
+          else if (strncmp("  ", parsedLine[0],2) == 0)    // test 15 (white space)
+        {
+           whitespacecounter(line,length); 
+           printShell();
+        }
+        
+        else if (strncmp("ls", parsedLine[0],2) == 0)
+>>>>>>> ec806dc2075fa04c33ba72aeb67293cacd02f58f
         {
 //            printf("DB:list \n");
             child_pid = fork();
