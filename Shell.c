@@ -4,6 +4,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #define Byte 8
 //DB stands for Debug print statment. Will need to delete before submitting
 void printShell()
@@ -83,6 +86,43 @@ char **readLine(char *Line)
     }
 }
 
+int whitespacecounter(char *input, int length)  //for whitespaces in an input string
+{
+    int i = 0;
+    int counter = 0;
+    for (i = 0; i < length; i++)
+    {
+        if (input[i] == ' ')
+        {
+            counter++;
+        }
+    }
+        return counter;
+}
+
+void redir(char *cmd, char **file)
+{
+    int fd, fds[2], count;
+    char x;
+    pid_t pid;
+    pipe(fds);
+
+        if (fork() == 0)
+    {
+        //stdin redirection
+        fd = open(file[0], O_RDWR, 0777);
+        dup2(fds[0], 0);
+        close(fds[1]);
+
+        //stdout redirection
+        while ((count = read(0, &x, 1)) > 0)
+        write (fd, &x, 1);  
+        exit (0);
+
+        execvp((const char*)cmd[0], (char *const*) cmd);
+    }
+}
+
 int main() {
     char **parsedLine;
     char *line = NULL;
@@ -92,6 +132,7 @@ int main() {
     ssize_t linelen;
     pid_t child_pid;
     int stat_loc;
+    int length;
     char error_message[30] = "An error has occurred\n";
     printShell();
     while ((linelen = getline(&line, &linesize, stdin)) != -1)
@@ -144,6 +185,16 @@ int main() {
         else if (strncmp("&", parsedLine[0],1) == 0)    // test 16
         {
             printShell();
+        }
+    /* else if (strncmp("", parsedLine[0],0) == 0)    // test 21 (empty command)
+        {
+           printShell();
+        }
+      */  
+          else if (strncmp("  ", parsedLine[0],2) == 0)    // test 15 (white space)
+        {
+           whitespacecounter(line,length); 
+           printShell();
         }
         else if (strcmp("ls\n", parsedLine[0]) == 0)
         {
