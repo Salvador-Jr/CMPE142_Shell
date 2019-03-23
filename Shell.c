@@ -183,9 +183,8 @@ int main() {
         {
            printShell();
         }
-<<<<<<< HEAD
         else if (strcmp("ls\n", parsedLine[0]) == 0)
-=======
+
         
         else if (strncmp("", parsedLine[0],0) == 0)    // test 21 (empty command)
         {
@@ -199,7 +198,6 @@ int main() {
         }
         
         else if (strncmp("ls", parsedLine[0],2) == 0)
->>>>>>> ec806dc2075fa04c33ba72aeb67293cacd02f58f
         {
 //            printf("DB:list \n");
             child_pid = fork();
