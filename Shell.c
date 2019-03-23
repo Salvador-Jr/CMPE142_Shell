@@ -4,6 +4,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #define Byte 8
 //DB stands for Debug print statment. Will need to delete before submitting
 void printShell()
