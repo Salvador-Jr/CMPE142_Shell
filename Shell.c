@@ -4,11 +4,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #define Byte 8
-
 //DB stands for Debug print statment. Will need to delete before submitting
 void printShell()
 {
@@ -25,11 +21,11 @@ char **readLine(char *Line)
 {
     char **linePassed = malloc(Byte * sizeof(char *));
     char *token;
+    char *lastToken;
     char *path = "path";
     char **updatedPath = malloc(Byte * sizeof(char *));
     int index = 0;
     char *NullTerminat = "\0";
-    
     token = strtok(Line, " ");
     
     if (strncmp("path", token, 4) == 0)
@@ -43,62 +39,51 @@ char **readLine(char *Line)
         updatedPath[index] = NULL;
         return updatedPath;
     }
+    else if (strncmp("cd", token, 2) == 0)
+    {
+        //        printf("DB: CDDDDDD\n");
+        while (token != NULL) {
+            //                printf("DB: Token%i %s,",index, token);
+            linePassed[index] = token;
+            index++;
+            token = strtok(NULL, "/");
+        }
+        linePassed[index] = NULL;
+        //        printf (" DB: the last one is:%s", linePassed[index -1]);
+        lastToken = linePassed[index -1];
+        int len = strlen(lastToken);
+        int minOne = len -1;
+        //        printf("DB: size is: %i\n", len);
+        for (int x =0; x <=minOne; x++)
+        {
+            lastToken[x] = lastToken[x];
+        }
+        lastToken[minOne] = '\0';
+        //        printf("DB: lastToken is %s\n", lastToken);
+        linePassed[index -1] = lastToken;
+        return linePassed;
+    }
     else
     {
-    while (token != NULL) {
-        //        printf("DB: Token%i %s,",index, token);
-        linePassed[index] = token;
-        index++;
-        token = strtok(NULL, " ");
-        if (token  == NULL)
-        {
-            //            printf("DB:WE ARE AT THE NULL\n");
+        while (token != NULL) {
+            //                printf("DB: Token%i %s,",index, token);
+            linePassed[index] = token;
+            index++;
+            token = strtok(NULL, "/");
+            if (token  == NULL)
+            {
+                //            printf("DB:WE ARE AT THE NULL\n");
+            }
         }
-    }
-    linePassed[index] = NULL;
-    return linePassed;
-    }
-}
-
-void redir(char *cmd, char **file)
-{
-    int fd, fds[2], count;
-    char x;
-    pid_t pid;
-    pipe(fds);
-
-        if (fork() == 0)
-    {
-        //stdin redirection
-        fd = open(file[0], O_RDWR, 0777);
-        dup2(fds[0], 0);
-        close(fds[1]);
-
-        //stdout redirection
-        while ((count = read(0, &x, 1)) > 0)
-        write (fd, &x, 1);  
-        exit (0);
-
-        execvp((const char*)cmd[0], (char *const*) cmd);
+        linePassed[index] = NULL;
+        //    printf ("the last one is:%s", linePassed[index -1]);
+        lastToken = linePassed[index -1];
+        
+        return linePassed;
     }
 }
 
-int whitespacecounter(char *input, int length)  //for whitespaces in an input string
-{
-    int i = 0;
-    int counter = 0;
-    for (i = 0; i < length; i++)
-    {
-        if (input[i] == ' ')
-        {
-            counter++;
-        }
-    }
-        return counter;
-}
-
-int main(int argc, char *argv[]) 
-{
+int main() {
     char **parsedLine;
     char *line = NULL;
     char *path = NULL;
@@ -107,21 +92,12 @@ int main(int argc, char *argv[])
     ssize_t linelen;
     pid_t child_pid;
     int stat_loc;
-    int length;
     char error_message[30] = "An error has occurred\n";
     printShell();
-  
     while ((linelen = getline(&line, &linesize, stdin)) != -1)
     {
         parsedLine = readLine(line);
-        //        printf(" DB: your commands: %s, %s\n", parsedLine[0], parsedLine[1]);
-        //Keep this in case you need to exit but modified the "exit" if-statment. Delete before submititng
-        if (strncmp("leave", parsedLine[0], 4) == 0)
-        {// user wants to exit
-            printf("DB:user wants to exit \n");
-            exit(0);
-        }
-        else if (strncmp("cd", parsedLine[0],2) == 0)
+        if (strncmp("cd", parsedLine[0],2) == 0)
         {
             if(parsedLine[1] == NULL)
             {
@@ -131,8 +107,18 @@ int main(int argc, char *argv[])
             else if (parsedLine[1] !=NULL)
             {
                 path = parsedLine[1];
-                printf("DB:We will now CD %s",path);
-                redir(path, parsedLine);
+                for(int i =1; i < 100; i++)
+                {
+                    if(parsedLine[i] !=NULL) {
+                        //                        printf("DB:trying to cd on:%s.\n",parsedLine[i]);
+                        chdir(parsedLine[i]);
+                    }
+                    if(parsedLine[i] ==NULL) {
+                        //                        printf("DB:going to exit loop\n");
+                        i = 99;
+                    }
+                }
+                //                printf("DB:We will now CD %s",path);
                 printShell();
             }
         }
@@ -145,35 +131,23 @@ int main(int argc, char *argv[])
             }
             else if (parsedLine[1] !=NULL)
             {
-                printf("DB:your selected path is %s",parsedLine[1] );
+                path = parsedLine[1];
+                printf("%s",path);
                 printShell();
             }
         }
-        else  if (strncmp("pwd", line, 3) == 0)
+        else  if (strcmp("pwd\n", parsedLine[0]) == 0)
         {
-            printf("DB:user wants to print \n");
+            //            printf("DB:user wants to print \n");
             userCurrentDirectory();
         }
-        
         else if (strncmp("&", parsedLine[0],1) == 0)    // test 16
         {
-           printShell();
+            printShell();
         }
-
-        else if (strncmp("", parsedLine[0],0) == 0)    // test 21 (empty command)
+        else if (strcmp("ls\n", parsedLine[0]) == 0)
         {
-           printShell();
-        }
-
-        else if (strncmp("  ", parsedLine[0],2) == 0)    // test 15 (white space)
-        {
-           whitespacecounter(line,length); 
-           printShell();
-        }
-        
-        else if (strncmp("ls", parsedLine[0],2) == 0)
-        {
-//            printf("DB:list \n");
+            //            printf("DB:list \n");
             child_pid = fork();
             if (child_pid < 0) {
                 write(STDERR_FILENO, error_message, strlen(error_message));
@@ -205,18 +179,15 @@ int main(int argc, char *argv[])
             }
             printShell();
         }
-        //This exit needs a space at the end to exit. When we parse through it saves the null terminator and therefore will not reutrn. need to debug.
-        else if (strcmp(parsedLine[0], "exit") == 0) {
+        else if (strcmp(parsedLine[0], "exit\n") == 0) {
             exit(0);
         }
         else{
             write(STDERR_FILENO, error_message, strlen(error_message));
             printShell();
         }
-        
-        //        free(line);
-        //        free(parsedLine);
     }
-    
+    free(line);
+    free(parsedLine);
     return 0;
 }
